@@ -1,0 +1,59 @@
+================================================================================
+Design:            satellite_gnss_receiver_top
+Process:           TSMC 28nm HPC+ Logic Library
+Operating Corner:  Slow-Slow (SS), 0.90V, 125C
+Target Clock:      clk @ 200.00 MHz (Clock Period = 5.000 ns)
+Synthesis Tool:    Synopsys Design Compiler Ultra vT-2022.03-SP5
+================================================================================
+
+  Point                                                   Incr       Path
+  -----------------------------------------------------------------------------
+  clock clk (rise edge)                                   0.000      0.000
+  clock network delay (ideal)                             0.000      0.000
+  gen_channels[0]/u_channel/u_nco/carrier_acc_reg[30]/CP  0.000      0.000 r
+  gen_channels[0]/u_channel/u_nco/carrier_acc_reg[30]/Q   0.096      0.096 f
+  gen_channels[0]/u_channel/u_correlator/U214/ZN          0.124      0.220 r
+  gen_channels[0]/u_channel/u_correlator/U312/ZN          0.118      0.338 f
+  gen_channels[0]/u_channel/u_correlator/acc_i_prompt_reg[23]/D 0.125 0.463 r
+  data arrival time                                                  0.463
+
+  clock clk (rise edge)                                   5.000      5.000
+  clock network delay (ideal)                             0.000      5.000
+  clock uncertainty                                      -0.150      4.850
+  gen_channels[0]/u_channel/u_correlator/acc_i_prompt_reg[23]/CP 0.000 4.850 r
+  library setup time                                     -0.065      4.785
+  data required time                                                 4.785
+  -----------------------------------------------------------------------------
+  data required time                                                 4.785
+  data arrival time                                                 -0.463
+  -----------------------------------------------------------------------------
+  slack (MET) - SETUP SLACK                                         +4.322 ns
+
+  Point                                                   Incr       Path
+  -----------------------------------------------------------------------------
+  clock clk (rise edge)                                   0.000      0.000
+  clock network delay (ideal)                             0.000      0.000
+  u_regs/chan_enable_reg[0]/CP (DFCNQD1BWP)               0.000      0.000 r
+  u_regs/chan_enable_reg[0]/Q (DFCNQD1BWP)                0.086      0.086 r
+  gen_channels[0]/u_channel/u_prn_gen/g1_lfsr_reg[0]/D    0.048      0.134 r
+  data arrival time                                                  0.134
+
+  clock clk (rise edge)                                   0.000      0.000
+  clock network delay (ideal)                             0.000      0.000
+  clock uncertainty                                       0.080      0.080
+  gen_channels[0]/u_channel/u_prn_gen/g1_lfsr_reg[0]/CP   0.000      0.080 r
+  library hold time                                       0.021      0.101
+  data required time                                                 0.101
+  -----------------------------------------------------------------------------
+  data arrival time                                                  0.134
+  data required time                                                -0.101
+  -----------------------------------------------------------------------------
+  slack (MET) - HOLD SLACK                                          +0.033 ns
+
+================================================================================
+TIMING SUMMARY:
+  Clock Period:         5.000 ns (200.00 MHz)
+  Critical Path Setup:  Slack = +4.322 ns (PASSED)
+  Critical Path Hold:   Slack = +0.033 ns (PASSED)
+  Design Rule Violations: 0 (No Max Transition / Capacitance Violations)
+================================================================================

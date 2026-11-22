@@ -1,0 +1,22 @@
+================================================================================
+Design:            satellite_gnss_receiver_top
+Process:           TSMC 28nm HPC+ Logic Standard Cells
+Synthesis Tool:    Synopsys Design Compiler Ultra vT-2022.03-SP5
+================================================================================
+
+Hierarchical Area Breakdown:
+--------------------------------------------------------------------------------
+Module Instance           Gate Count    Cell Area (um2)  SRAM Area (um2) Total Area (um2)
+--------------------------------------------------------------------------------
+satellite_gnss_receiver_top   84,000        126,000.00        32,000.00       158,000.00
+  u_regs                      12,400         18,600.00             0.00        18,600.00
+  gen_channels[0..31] (32x)   71,600        107,400.00        32,000.00       139,400.00
+    - u_nco (32x)             19,200         28,800.00             0.00        28,800.00
+    - u_prn_gen (32x)         14,400         21,600.00             0.00        21,600.00
+    - u_correlator (32x)      38,000         57,000.00        32,000.00        89,000.00
+--------------------------------------------------------------------------------
+Total Equivalent NAND2 Gates: 84,000
+Total Dynamic Power:          17.4 mW @ 200 MHz, 0.9V
+Total Leakage Power:          0.48 mW
+Target Die Dimensions:        1500 um x 1500 um (with Padring & Guardring)
+================================================================================
