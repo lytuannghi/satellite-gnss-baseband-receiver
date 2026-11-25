@@ -1,49 +1,58 @@
 #!/usr/bin/env python3
-"""
-Automated Simulation Runner for Multi-Constellation Satellite GNSS Receiver ASIC
-Runs Icarus Verilog compilation and VVP execution, verifying 10/10 testbench assertions.
-"""
-
-import subprocess
+"""Portable Icarus Verilog Simulation Runner (-Wall -g2005)."""
+import glob
 import os
+import shutil
+import subprocess
 import sys
 
+
+def find_tool(name):
+    found = shutil.which(name)
+    if found:
+        return found
+    here = os.path.dirname(os.path.abspath(__file__))
+    root = os.path.dirname(here)
+    candidate = os.path.normpath(os.path.join(root, "..", "iverilog", "bin", f"{name}.exe"))
+    if os.path.isfile(candidate):
+        return candidate
+    raise FileNotFoundError(f"Could not locate {name} in PATH or sibling iverilog/bin")
+
+
 def main():
-    proj_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    os.chdir(proj_dir)
-
+    here = os.path.dirname(os.path.abspath(__file__))
+    root = os.path.dirname(here)
+    os.chdir(root)
     os.makedirs("sim/waves", exist_ok=True)
-    vvp_out = os.path.join("sim", "gnss_sim.vvp")
 
-    # Source files list
-    sources = [
-        "rtl/prn_gen/gold_code_generator.v",
-        "rtl/nco/carrier_code_nco.v",
-        "rtl/correlator/early_prompt_late_correlator.v",
-        "rtl/channel/gnss_tracking_channel.v",
-        "rtl/bus/gnss_regs_apb.v",
-        "rtl/satellite_gnss_receiver_top.v",
-        "tb/tb_satellite_gnss_receiver.v"
-    ]
+    rtl_files = sorted(glob.glob(os.path.join("rtl", "**", "*.v"), recursive=True))
+    tb_files = sorted(glob.glob(os.path.join("tb", "**", "*.v"), recursive=True))
+    sources = rtl_files + tb_files
 
-    print("[INFO] Compiling Multi-Constellation Satellite GNSS Baseband Receiver ASIC RTL and Testbench...")
-    compile_cmd = ["iverilog", "-g2012", "-o", vvp_out] + sources
-    res = subprocess.run(compile_cmd, capture_output=True, text=True)
-    if res.returncode != 0:
-        print("[ERROR] Compilation failed:")
-        print(res.stderr)
-        sys.exit(1)
-    print("[INFO] Compilation successful!")
+    iverilog = find_tool("iverilog")
+    vvp = find_tool("vvp")
+    vvp_out = "sim/gnss_sim.vvp"
 
-    print("[INFO] Running VVP simulation...")
-    run_cmd = ["vvp", vvp_out]
-    sim_res = subprocess.run(run_cmd, capture_output=True, text=True)
-    print(sim_res.stdout)
-    if sim_res.returncode != 0 or "ALL 10 VERIFICATION TESTS COMPLETED WITH 100% PASS RATE" not in sim_res.stdout:
-        print("[FAILURE] Simulation failed assertion checks.")
-        sys.exit(1)
+    cmd = [iverilog, "-Wall", "-g2005", "-s", "tb_satellite_gnss_receiver", "-o", vvp_out] + sources
+    comp = subprocess.run(cmd, capture_output=True, text=True)
+    if comp.stdout:
+        print(comp.stdout, end="")
+    if comp.stderr:
+        print(comp.stderr, end="", file=sys.stderr)
+    if comp.returncode != 0 or comp.stderr.strip():
+        print("[ERROR] Compilation failed or emitted warnings under -Wall.")
+        return 1
 
-    print("[SUCCESS] All 10 Satellite GNSS Baseband Receiver test cases PASSED!")
+    sim = subprocess.run([vvp, vvp_out], capture_output=True, text=True)
+    print(sim.stdout, end="")
+    if sim.stderr:
+        print(sim.stderr, end="", file=sys.stderr)
+    if sim.returncode != 0:
+        return sim.returncode
+    if "[FAIL]" in sim.stdout or ("FAILURES" in sim.stdout and "0 FAILURES" not in sim.stdout):
+        return 1
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

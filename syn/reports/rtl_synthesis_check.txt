@@ -1,0 +1,24 @@
+================================================================================
+RTL SYNTHESIS READINESS & CONSTRAINT REPORT: satellite-gnss-baseband-receiver
+Method : Static Verilog/SV Structural Parser + SDC Constraint Audit
+Note   : Foundry Gate-Level Netlist & STA require PDK Liberty (.lib) + Synopsys/OpenROAD
+================================================================================
+RTL Source Files Inspected : 6
+Code Lines (Non-Comment)   : 503
+Sequential Blocks          : 6
+Combinational Blocks       : 1
+Declared reg/logic Signals : 41
+
+MODULE BREAKDOWN:
+  rtl\bus\gnss_regs_apb.v                       | modules=gnss_regs_apb                | loc= 117 | seq= 1 | comb= 0
+  rtl\channel\gnss_tracking_channel.v           | modules=gnss_tracking_channel        | loc=  88 | seq= 1 | comb= 0
+  rtl\correlator\early_prompt_late_correlator.v | modules=early_prompt_late_correlator | loc=  82 | seq= 2 | comb= 0
+  rtl\nco\carrier_code_nco.v                    | modules=carrier_code_nco             | loc=  45 | seq= 1 | comb= 0
+  rtl\prn_gen\gold_code_generator.v             | modules=gold_code_generator          | loc=  73 | seq= 1 | comb= 1
+  rtl\satellite_gnss_receiver_top.v             | modules=satellite_gnss_receiver_top  | loc=  98 | seq= 0 | comb= 0
+
+SDC CLOCK CONSTRAINTS:
+  gnss_timing.sdc: port=clk | period=5.00 ns | target=200.00 MHz
+
+ARITHMETIC DIVISION/MODULO CHECK: CLEAN (0 combinational / or % operators)
+================================================================================

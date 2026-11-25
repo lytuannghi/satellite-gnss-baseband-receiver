@@ -1,54 +1,26 @@
-================================================================================
-CALIBRE nmDRC REPORT
-Design:          satellite_gnss_receiver_top
-GDSII File:      layout/gds/satellite_gnss_receiver_top.gds
-Technology:      TSMC 28nm HPC+ 1P9M (1 Poly, 9 Metal)
-Die Dimensions:  1500.00 um x 1500.00 um
-Calibre Version: v2022.4_38.22
-Execution Date:  Sun Nov 22 12:00:00 2026
-================================================================================
-
-RULECHECK RESULTS EXECUTED:
---------------------------------------------------------------------------------
-RULE NAME                    RESULTS     STATUS
---------------------------------------------------------------------------------
-M1.SP.1 (Min Spacing)        0           CLEAN (PASSED)
-M1.W.1  (Min Width)          0           CLEAN (PASSED)
-M2.SP.1 (Min Spacing)        0           CLEAN (PASSED)
-M2.W.1  (Min Width)          0           CLEAN (PASSED)
-M3.SP.1 (Min Spacing)        0           CLEAN (PASSED)
-M3.W.1  (Min Width)          0           CLEAN (PASSED)
-M4.SP.1 (Min Spacing)        0           CLEAN (PASSED)
-M4.W.1  (Min Width)          0           CLEAN (PASSED)
-M5.SP.1 (Min Spacing)        0           CLEAN (PASSED)
-M5.W.1  (Min Width)          0           CLEAN (PASSED)
-M6.SP.1 (Min Spacing)        0           CLEAN (PASSED)
-M6.W.1  (Min Width)          0           CLEAN (PASSED)
-M7.SP.1 (Min Spacing)        0           CLEAN (PASSED)
-M7.W.1  (Min Width)          0           CLEAN (PASSED)
-M8.SP.1 (Min Spacing)        0           CLEAN (PASSED)
-M8.W.1  (Min Width)          0           CLEAN (PASSED)
-M9.SP.1 (Min Spacing)        0           CLEAN (PASSED)
-M9.W.1  (Min Width)          0           CLEAN (PASSED)
-VIA1.E.1 (Enclosure)         0           CLEAN (PASSED)
-VIA2.E.1 (Enclosure)         0           CLEAN (PASSED)
-VIA3.E.1 (Enclosure)         0           CLEAN (PASSED)
-VIA4.E.1 (Enclosure)         0           CLEAN (PASSED)
-VIA5.E.1 (Enclosure)         0           CLEAN (PASSED)
-VIA6.E.1 (Enclosure)         0           CLEAN (PASSED)
-VIA7.E.1 (Enclosure)         0           CLEAN (PASSED)
-VIA8.E.1 (Enclosure)         0           CLEAN (PASSED)
-ANTENNA.1 (Gate Antenna)     0           CLEAN (PASSED)
-DENSITY.M1 (Min/Max Density) 0           CLEAN (PASSED)
-DENSITY.M2 (Min/Max Density) 0           CLEAN (PASSED)
-DENSITY.M3 (Min/Max Density) 0           CLEAN (PASSED)
-DENSITY.M4 (Min/Max Density) 0           CLEAN (PASSED)
-DENSITY.M5 (Min/Max Density) 0           CLEAN (PASSED)
-DENSITY.M6 (Min/Max Density) 0           CLEAN (PASSED)
-DENSITY.M7 (Min/Max Density) 0           CLEAN (PASSED)
-DENSITY.M8 (Min/Max Density) 0           CLEAN (PASSED)
-DENSITY.M9 (Min/Max Density) 0           CLEAN (PASSED)
---------------------------------------------------------------------------------
-TOTAL DRC VIOLATIONS: 0 (ZERO ERRORS)
-OVERALL DRC STATUS: PASSED
-================================================================================
+====================================================================================
+GEOMETRIC GDSII DESIGN RULE CHECK (DRC) VERIFICATION REPORT
+Technology      : SkyWater 130nm
+Top Cell        : satellite_gnss_receiver_top
+GDSII File      : ..\satellite-gnss-baseband-receiver\layout\gds\satellite_gnss_receiver_top.gds
+GDSII Size      : 26,700 bytes | ENDLIB=True
+Die Bounding Box: (0.00, 0.00) um to (420.00, 420.00) um [420.00 um x 420.00 um]
+Checker Engine  : Python Geometric GDSII Sweep-Line DRC Verifier (Reference Deck)
+====================================================================================
+LAYER-BY-LAYER GEOMETRIC CHECKS:
+  L64  (NWELL   ): polys=    16, density=21.59%, width_err=0, space_err=0, overlap_err=0, oob_err=0 -> PASSED
+  L65  (DIFF    ): polys=    16, density= 4.79%, width_err=0, space_err=0, overlap_err=0, oob_err=0 -> PASSED
+  L66  (POLY    ): polys=    16, density= 0.13%, width_err=0, space_err=0, overlap_err=0, oob_err=0 -> PASSED
+  L67  (CONTACT ): polys=    16, density= 0.02%, width_err=0, space_err=0, overlap_err=0, oob_err=0 -> PASSED
+  L68  (METAL1  ): polys=   208, density=11.85%, width_err=0, space_err=0, overlap_err=0, oob_err=0 -> PASSED
+  L70  (METAL2  ): polys=    80, density= 4.81%, width_err=0, space_err=0, overlap_err=0, oob_err=0 -> PASSED
+  L72  (METAL3  ): polys=     6, density= 3.41%, width_err=0, space_err=0, overlap_err=0, oob_err=0 -> PASSED
+  L74  (METAL4  ): polys=     2, density= 2.06%, width_err=0, space_err=0, overlap_err=0, oob_err=0 -> PASSED
+  L75  (VIA4    ): polys=     4, density= 0.02%, width_err=0, space_err=0, overlap_err=0, oob_err=0 -> PASSED
+  L76  (METAL5  ): polys=     2, density= 2.06%, width_err=0, space_err=0, overlap_err=0, oob_err=0 -> PASSED
+  L108 (PAD     ): polys=    48, density= 3.92%, width_err=0, space_err=0, overlap_err=0, oob_err=0 -> PASSED
+  L235 (DIEAREA ): polys=     1, density=100.00%, width_err=0, space_err=0, overlap_err=0, oob_err=0 -> PASSED
+------------------------------------------------------------------------------------
+TOTAL GEOMETRIC DRC VIOLATIONS: 0
+DRC STATUS: CLEAN (0 VIOLATIONS)
+====================================================================================

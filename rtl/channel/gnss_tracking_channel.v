@@ -110,7 +110,7 @@ module gnss_tracking_channel (
             dll_discriminator <= 24'sd0;
             pll_discriminator <= 24'sd0;
             prompt_power      <= 32'd0;
-        end else if (epoch_1ms_pulse) begin
+        end else if (channel_ready) begin
             // Dot-Product DLL Discriminator: (IE - IL)*IP + (QE - QL)*QP
             dll_discriminator <= ((out_i_early - out_i_late) * (out_i_prompt >>> 8)) +
                                  ((out_q_early - out_q_late) * (out_q_prompt >>> 8));

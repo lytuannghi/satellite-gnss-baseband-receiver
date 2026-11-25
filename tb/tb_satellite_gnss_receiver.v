@@ -260,80 +260,97 @@ module tb_satellite_gnss_receiver;
         // -------------------------------------------------------------
         // Test 6: In-Phase & Quadrature (I/Q) Carrier Demodulation
         // -------------------------------------------------------------
-        // Enable Master & Channel 0
         apb_write(12'h000, 32'h00000001); // Master Enable = 1
-        apb_write(12'h004, 32'h000000FF); // Enable Channels 0-7
-        repeat(20) @(posedge clk);
-
-        if (u_dut.gen_channels[0].u_channel.u_nco.carrier_cos != 8'sd0 ||
-            u_dut.gen_channels[0].u_channel.u_nco.carrier_sin != 8'sd0) begin
-            $display("[PASS] Test 6: Complex In-Phase & Quadrature (I/Q) carrier mixer operating with active LO.");
-            tests_passed = tests_passed + 1;
-        end else begin
-            $display("[FAIL] Test 6: Carrier mixer inactive.");
-            tests_failed = tests_failed + 1;
+        apb_write(12'h004, 32'h00000001); // Enable Channel 0
+        begin: carrier_quad_check
+            integer qc;
+            reg saw_cos_nz, saw_sin_nz;
+            saw_cos_nz = 1'b0;
+            saw_sin_nz = 1'b0;
+            for (qc = 0; qc < 60; qc = qc + 1) begin
+                @(posedge clk);
+                if (u_dut.gen_channels[0].u_channel.u_nco.carrier_cos != 8'sd0) saw_cos_nz = 1'b1;
+                if (u_dut.gen_channels[0].u_channel.u_nco.carrier_sin != 8'sd0) saw_sin_nz = 1'b1;
+            end
+            if (saw_cos_nz && saw_sin_nz) begin
+                $display("[PASS] Test 6: Complex In-Phase & Quadrature (I/Q) carrier mixer operating across quadrature states.");
+                tests_passed = tests_passed + 1;
+            end else begin
+                $display("[FAIL] Test 6: Carrier mixer inactive (cos=%b sin=%b).", saw_cos_nz, saw_sin_nz);
+                tests_failed = tests_failed + 1;
+            end
         end
 
         // -------------------------------------------------------------
-        // Test 7: Early-Prompt-Late (EPL) Correlator Coherent Accumulation
+        // Tests 7-10: Coherent PRN Tracking, Full 1ms Epoch Dump, DLL/PLL APB Readback
         // -------------------------------------------------------------
-        // Inject synthetic signal aligned with PRN prompt
-        rf_adc_i = 4'sd2;
-        rf_adc_q = 4'sd0;
-        repeat(50) @(posedge clk);
-
-        if (u_dut.gen_channels[0].u_channel.u_correlator.acc_i_prompt != 24'sd0 ||
-            u_dut.gen_channels[0].u_channel.u_correlator.acc_i_early != 24'sd0) begin
-            $display("[PASS] Test 7: Early-Prompt-Late (EPL) Correlator coherently accumulating baseband power.");
-            tests_passed = tests_passed + 1;
-        end else begin
-            $display("[FAIL] Test 7: Correlator accumulation failed.");
-            tests_failed = tests_failed + 1;
-        end
-
-        // -------------------------------------------------------------
-        // Test 8: Delay Locked Loop (DLL) Code Phase Tracking Discriminator
-        // -------------------------------------------------------------
-        // Trigger manual epoch dump on channel 0 to test discriminator evaluation
-        #5;
-        if (u_dut.gen_channels[0].u_channel.dll_discriminator !== 24'shX) begin
-            $display("[PASS] Test 8: Hardware DLL Code Tracking Discriminator evaluated cleanly.");
-            tests_passed = tests_passed + 1;
-        end else begin
-            $display("[FAIL] Test 8: DLL Discriminator produced X/Z.");
-            tests_failed = tests_failed + 1;
-        end
-
-        // -------------------------------------------------------------
-        // Test 9: Phase Locked Loop (PLL) Costas Carrier Tracking Discriminator
-        // -------------------------------------------------------------
-        if (u_dut.gen_channels[0].u_channel.pll_discriminator !== 24'shX) begin
-            $display("[PASS] Test 9: Hardware Costas Carrier Tracking PLL Discriminator evaluated cleanly.");
-            tests_passed = tests_passed + 1;
-        end else begin
-            $display("[FAIL] Test 9: PLL Costas Discriminator produced X/Z.");
-            tests_failed = tests_failed + 1;
-        end
-
-        // -------------------------------------------------------------
-        // Test 10: Multi-Channel Parallel Tracking & 1ms Epoch Interrupt Generation
-        // -------------------------------------------------------------
-        // Fast-forward channel 0 epoch dump
-        u_dut.gen_channels[0].u_channel.u_prn_gen.chip_count = 10'd1021;
-        u_dut.gen_channels[0].u_channel.u_nco.chip_step_pulse = 1;
+        // Synchronize Channel 0 & reference PRN1 generator with baseband carrier and fast code NCO
+        apb_write(12'h004, 32'h00000000); // Hold Ch0 in reset while configuring NCOs
+        apb_write(12'h200, 32'h00000000); // Locked carrier (cos=127, sin=0)
+        apb_write(12'h300, 32'h80000000); // Fast chipping rate: 1 chip per 2 clocks (~2046 clocks/epoch)
+        tb_code_rst = 1;
         @(posedge clk); #0.2;
-        u_dut.gen_channels[0].u_channel.u_nco.chip_step_pulse = 0;
-        @(posedge clk); #0.2;
-        u_dut.gen_channels[0].u_channel.u_nco.chip_step_pulse = 1;
-        @(posedge clk); #0.2;
-        u_dut.gen_channels[0].u_channel.u_nco.chip_step_pulse = 0;
+        tb_code_rst = 0;
+
+        saw_epoch_irq = 0;
+        apb_write(12'h004, 32'h00000001); // Enable Channel 0 cleanly
+
+        // Stream coherent early+prompt PRN1 modulated ADC signal through 1023 chips (2100 clocks)
+        begin: gnss_epoch_drive
+            integer cyc;
+            integer sig_val_i;
+            integer sig_val_q;
+            for (cyc = 0; cyc < 2100 && !saw_epoch_irq; cyc = cyc + 1) begin
+                // Mix 0.5-chip Early and Prompt PRN1 replicas to produce positive DLL & PLL signals
+                sig_val_i = (tb_gps_early ? -2 : 2) + (tb_gps_prompt ? -3 : 3);
+                sig_val_q = (tb_gps_prompt ? -2 : 2);
+                rf_adc_i = sig_val_i[3:0];
+                rf_adc_q = sig_val_q[3:0];
+
+                // Step reference PRN1 in lockstep every 2 clocks matching code_fcw=0x80000000
+                tb_chip_step = ((cyc % 2) == 1);
+                @(posedge clk); #0.2;
+            end
+        end
+        tb_chip_step = 0;
         repeat(5) @(posedge clk);
 
-        if (saw_epoch_irq || irq_epoch_1ms || u_dut.irq_epoch_1ms) begin
-            $display("[PASS] Test 10: Multi-Channel 1ms Epoch Interrupt asserted successfully across channels.");
+        // Test 7: EPL Coherent Correlation Power over APB3
+        apb_read(12'h500, read_val);
+        if (read_val > 32'd0) begin
+            $display("[PASS] Test 7: EPL Correlator coherently accumulated signal power (Power = %0d).", read_val);
             tests_passed = tests_passed + 1;
         end else begin
-            $display("[FAIL] Test 10: Epoch interrupt failed to fire.");
+            $display("[FAIL] Test 7: Correlator prompt power returned zero.");
+            tests_failed = tests_failed + 1;
+        end
+
+        // Test 8: Delay Locked Loop (DLL) Discriminator Readback over APB3
+        apb_read(12'h600, read_val);
+        if (read_val != 32'd0 && ($signed(read_val) != 32'sd0)) begin
+            $display("[PASS] Test 8: Hardware DLL Code Tracking Discriminator evaluated (DLL = %0d).", $signed(read_val));
+            tests_passed = tests_passed + 1;
+        end else begin
+            $display("[FAIL] Test 8: DLL Discriminator returned zero.");
+            tests_failed = tests_failed + 1;
+        end
+
+        // Test 9: Costas Phase Locked Loop (PLL) Discriminator Readback over APB3
+        apb_read(12'h700, read_val);
+        if (read_val != 32'd0 && ($signed(read_val) != 32'sd0)) begin
+            $display("[PASS] Test 9: Hardware Costas PLL Discriminator evaluated (PLL = %0d).", $signed(read_val));
+            tests_passed = tests_passed + 1;
+        end else begin
+            $display("[FAIL] Test 9: PLL Costas Discriminator returned zero.");
+            tests_failed = tests_failed + 1;
+        end
+
+        // Test 10: Authentic 1ms Epoch Rollover Interrupt
+        if (saw_epoch_irq) begin
+            $display("[PASS] Test 10: Authentic 1023-chip 1ms Epoch Rollover Interrupt asserted.");
+            tests_passed = tests_passed + 1;
+        end else begin
+            $display("[FAIL] Test 10: 1ms Epoch Interrupt failed to assert after 1023 chips.");
             tests_failed = tests_failed + 1;
         end
 

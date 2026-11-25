@@ -2,7 +2,7 @@
 # Synopsys Design Constraints (SDC)
 # Design: satellite_gnss_receiver_top
 # Operating Frequency: 200 MHz (Clock Period = 5.000 ns)
-# Process: TSMC 28nm HPC+ Logic Library
+# Process: SkyWater 130nm HD Standard Cell Library (1.80V, 25C)
 # ==============================================================================
 
 # Primary Master Clock Definition (200 MHz)
@@ -22,7 +22,7 @@ set_output_delay -clock clk -max 1.100 [get_ports {prdata* pready pslverr irq_ep
 set_output_delay -clock clk -min 0.200 [get_ports {prdata* pready pslverr irq_epoch_1ms chan_epoch_out*}]
 
 # Drive Strength and Output Load Modeling
-set_driving_cell -lib_cell INVD2BWP -library tcbn28hpcplus_ss0p9v125c [all_inputs]
+set_driving_cell -lib_cell sky130_fd_sc_hd__inv_2 -library sky130_fd_sc_hd [all_inputs]
 set_load 0.025 [all_outputs]
 
 # Multicycle Path & False Path Constraints

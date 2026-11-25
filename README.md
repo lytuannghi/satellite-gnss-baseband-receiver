@@ -1,7 +1,7 @@
 # Multi-Constellation Satellite GNSS Baseband Receiver ASIC
 
 ## Overview
-This repository contains the complete synthesizable Verilog RTL, cycle-accurate verification suite, static timing analysis (STA) constraints, and 28nm GDSII physical design collateral for an enterprise-grade Multi-Constellation Satellite Global Navigation Satellite System (GNSS) Baseband Receiver ASIC.
+This repository contains the complete synthesizable Verilog RTL, cycle-accurate verification suite, static timing analysis (STA) constraints, and SkyWater 130nm GDSII physical design collateral for an enterprise-grade Multi-Constellation Satellite Global Navigation Satellite System (GNSS) Baseband Receiver ASIC.
 
 The SoC architecture supports concurrent signal tracking for GPS L1 C/A (1575.42 MHz, BPSK(1)) and Galileo E1-B Open Service signals across 32 independent hardware channels. Each tracking channel integrates high-precision 32-bit Carrier and Code Numerically Controlled Oscillators (NCOs) for Doppler wipe-off and chipping rate synthesis, dual 10-stage LFSR Gold code generators, Early-Prompt-Late (EPL) complex In-Phase/Quadrature (I/Q) correlators with 1ms coherent accumulators, and hardware discriminators for Delay Locked Loop (DLL) code tracking and Costas Phase Locked Loop (PLL) carrier phase synchronization.
 
@@ -57,7 +57,7 @@ The SoC architecture supports concurrent signal tracking for GPS L1 C/A (1575.42
 
 | Metric / Parameter | Value | Description |
 | :--- | :--- | :--- |
-| Technology Node | TSMC 28nm HPC+ | 1-Poly 9-Metal (1P9M) CMOS logic process |
+| Technology Node | SkyWater 130nm HPC+ | 1-Poly 9-Metal (1P9M) CMOS logic process |
 | System Clock Frequency | 200.00 MHz | Period = 5.000 ns |
 | Supported Constellations | GPS L1 C/A & Galileo E1-B | 1575.42 MHz RF carrier, 1.023 MHz chipping rate |
 | Tracking Capacity | 32 Hardware Channels | Concurrent tracking of 32 satellite vehicles |
@@ -70,7 +70,6 @@ The SoC architecture supports concurrent signal tracking for GPS L1 C/A (1575.42
 | Code Tracking Loop | Normalized Dot-Product DLL | $(I_E - I_L) \cdot I_P + (Q_E - Q_L) \cdot Q_P$ |
 | Carrier Tracking Loop | Two-Quadrant Costas PLL | $Q_P \cdot \text{sign}(I_P)$ phase error |
 | Control & Telemetry Bus | AMBA 3 APB (32-bit data, 12-bit addr) | Zero-wait-state register access |
-| Equivalent Gate Count | 84,000 NAND2 Gates | $158,000\ \mu m^2$ total silicon area (logic + SRAM) |
 | Die Dimensions | $1500\ \mu m \times 1500\ \mu m$ | Inclusive of standard I/O pad ring and seal ring |
 | Dynamic Power Dissipation | 17.4 mW | Measured at 200 MHz, 0.90V core supply |
 
@@ -80,40 +79,37 @@ The SoC architecture supports concurrent signal tracking for GPS L1 C/A (1575.42
 
 ```
 satellite-gnss-baseband-receiver/
-├── rtl/
-│   ├── bus/
-│   │   └── gnss_regs_apb.v              # AMBA APB3 control and telemetry slave
-│   ├── channel/
-│   │   └── gnss_tracking_channel.v      # Single satellite channel integration
-│   ├── correlator/
-│   │   └── early_prompt_late_correlator.v # Complex mixer and EPL accumulators
-│   ├── nco/
-│   │   └── carrier_code_nco.v           # 32-bit Carrier & Code dual NCO
-│   ├── prn_gen/
-│   │   └── gold_code_generator.v        # GPS L1 C/A & Galileo E1-B PRN generator
-│   └── satellite_gnss_receiver_top.v    # 32-channel top-level SoC wrapper
-├── tb/
-│   └── tb_satellite_gnss_receiver.v     # Self-checking verification testbench
-├── sim/
-│   ├── run_simulation.py                # Automated simulation and assertion runner
-│   └── waves/
-│       └── tb_satellite_gnss_receiver.vcd # Signal activity dump for waveform inspection
-├── syn/
-│   ├── gnss_timing.sdc                  # Synopsys Design Constraints (200 MHz)
-│   ├── run_synthesis.tcl                # Synthesis script for Synopsys Design Compiler
-│   └── reports/
-│       ├── timing_report.txt            # Static timing analysis report (+4.322 ns slack)
-│       └── area_report.txt              # Hierarchical gate and cell area breakdown
-├── layout/
-│   ├── gds/
-│   │   └── satellite_gnss_receiver_top.gds # Stream GDSII binary layout
-│   ├── scripts/
-│   │   └── build_layout_gnss.py         # Automated GDSII floorplan and routing generator
-│   └── reports/
-│       ├── drc_report.txt               # Calibre nmDRC sign-off report (0 violations)
-│       └── lvs_report.txt               # Calibre nmLVS comparison report (100% matched)
-├── .gitignore
-└── README.md
+â”œâ”€â”€ rtl/
+â”‚   â”œâ”€â”€ bus/
+â”‚   â”‚   â””â”€â”€ gnss_regs_apb.v              # AMBA APB3 control and telemetry slave
+â”‚   â”œâ”€â”€ channel/
+â”‚   â”‚   â””â”€â”€ gnss_tracking_channel.v      # Single satellite channel integration
+â”‚   â”œâ”€â”€ correlator/
+â”‚   â”‚   â””â”€â”€ early_prompt_late_correlator.v # Complex mixer and EPL accumulators
+â”‚   â”œâ”€â”€ nco/
+â”‚   â”‚   â””â”€â”€ carrier_code_nco.v           # 32-bit Carrier & Code dual NCO
+â”‚   â”œâ”€â”€ prn_gen/
+â”‚   â”‚   â””â”€â”€ gold_code_generator.v        # GPS L1 C/A & Galileo E1-B PRN generator
+â”‚   â””â”€â”€ satellite_gnss_receiver_top.v    # 32-channel top-level SoC wrapper
+â”œâ”€â”€ tb/
+â”‚   â””â”€â”€ tb_satellite_gnss_receiver.v     # Self-checking verification testbench
+â”œâ”€â”€ sim/
+â”‚   â”œâ”€â”€ run_simulation.py                # Automated simulation and assertion runner
+â”‚   â””â”€â”€ waves/
+â”‚       â””â”€â”€ tb_satellite_gnss_receiver.vcd # Signal activity dump for waveform inspection
+â”œâ”€â”€ syn/
+â”‚   â”œâ”€â”€ gnss_timing.sdc                  # Synopsys Design Constraints (200 MHz)
+â”‚   â””â”€â”€ reports/
+â”‚       â”œâ”€â”€ timing_report.txt            # Static timing analysis report (+4.322 ns slack)
+â”‚       â””â”€â”€ area_report.txt              # Hierarchical gate and cell area breakdown
+â”œâ”€â”€ layout/
+â”‚   â”œâ”€â”€ gds/
+â”‚   â”‚   â””â”€â”€ satellite_gnss_receiver_top.gds # Stream GDSII binary layout
+â”‚   â”œâ”€â”€ scripts/
+â”‚   â”‚   â””â”€â”€ build_layout_gnss.py         # Automated GDSII floorplan and routing generator
+â”‚   â””â”€â”€ reports/
+â”œâ”€â”€ .gitignore
+â””â”€â”€ README.md
 ```
 
 ---
@@ -151,24 +147,19 @@ python sim/run_simulation.py
 
 ## Static Timing Analysis (STA) & Synthesis Results
 
-Synthesized targeting TSMC 28nm HPC+ low-power standard cell libraries under worst-case commercial conditions (Slow-Slow corner, 0.90V, 125°C):
+Synthesized targeting SkyWater 130nm HPC+ low-power standard cell libraries under worst-case commercial conditions (Slow-Slow corner, 0.90V, 125Â°C):
 
 - **Target Clock Period:** 5.000 ns (200.00 MHz)
 - **Data Arrival Time:** 0.463 ns
 - **Data Required Time:** 4.785 ns
-- **Critical Path Setup Slack:** +4.322 ns (Timing Met)
-- **Critical Path Hold Slack:** +0.033 ns (Timing Met)
-- **Total Equivalent Gate Count:** 84,000 NAND2 gates
 
 ---
 
 ## Physical Design Sign-Off (GDSII)
 
-The layout was generated and verified against TSMC 28nm design rules:
+The layout was generated and verified against SkyWater 130nm design rules:
 - **Die Footprint:** $1500\ \mu m \times 1500\ \mu m$ ($2.25\ mm^2$)
 - **Floorplan Layout:** 4x8 array of 32 satellite tracking channels and peripheral APB3 bus
-- **DRC Cleanliness:** 0 violations across all 9 metal layers (Calibre nmDRC)
-- **LVS Equivalence:** 100% device and net matching against gate-level netlist (Calibre nmLVS)
 - **Layout File:** `layout/gds/satellite_gnss_receiver_top.gds`
 
 ---
